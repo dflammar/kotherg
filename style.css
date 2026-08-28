@@ -156,6 +156,36 @@ h1, h2, h3, h4 {
     color: #5a5451;
 }
 
+.hero-price {
+    display: inline-block;
+    background: white;
+    padding: 10px 25px;
+    border-radius: 50px;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    border: 2px solid var(--accent);
+}
+
+.price-label {
+    font-size: 1.1rem;
+    color: var(--secondary);
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.price-amount {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #d90429;
+}
+
+.price-currency {
+    font-size: 1rem;
+    color: #555;
+    margin-right: 5px;
+    font-weight: bold;
+}
+
 .slogan {
     font-size: 1.5rem;
     color: var(--secondary);
@@ -299,50 +329,7 @@ h1, h2, h3, h4 {
     max-width: 800px;
     border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
     aspect-ratio: 16/9;
-}
-
-.video-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.play-btn {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80px;
-    height: 80px;
-    background: rgba(255,255,255,0.9);
-    border: none;
-    border-radius: 50%;
-    font-size: 2rem;
-    color: var(--secondary);
-    cursor: pointer;
-    box-shadow: 0 0 0 10px rgba(255,255,255,0.3);
-    transition: var(--transition);
-    z-index: 2;
-}
-
-.play-btn:hover {
-    transform: translate(-50%, -50%) scale(1.1);
-    background: white;
-    box-shadow: 0 0 0 20px rgba(255,255,255,0.2);
-}
-
-.video-container::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.2);
-    pointer-events: none;
 }
 
 /* Rarity Section */
@@ -531,11 +518,19 @@ h1, h2, h3, h4 {
 .order-title {
     font-size: 1.8rem;
     line-height: 1.6;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
     color: var(--bg-light);
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
+}
+
+.footer-price-tag {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--accent);
+    margin-bottom: 40px;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 
 .success-message {

@@ -33,14 +33,6 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Video Play Button (Mock)
-const playBtn = document.querySelector('.play-btn');
-if (playBtn) {
-    playBtn.addEventListener('click', () => {
-        alert('سيتم تشغيل الفيديو هنا! (فيديو لطفل يلعب بالكرسي 15 ثانية)');
-    });
-}
-
 // Form Submission
 const orderForm = document.getElementById('orderForm');
 const successMessage = document.getElementById('successMessage');
