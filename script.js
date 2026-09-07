@@ -35,19 +35,11 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
 // Form Submission
 const orderForm = document.getElementById('orderForm');
-const successMessage = document.getElementById('successMessage');
 
 if (orderForm) {
     orderForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        // Hide form and show success message
-        orderForm.style.display = 'none';
-        successMessage.style.display = 'block';
-        
-        // Hide order title
-        const orderTitle = document.querySelector('.order-title');
-        if (orderTitle) {
-            orderTitle.style.display = 'none';
-        }
+        // Redirect to thank you page so Meta Pixel can track the lead/purchase properly
+        window.location.href = 'thankyou.html';
     });
 }
