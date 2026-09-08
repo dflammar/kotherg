@@ -39,7 +39,35 @@ const orderForm = document.getElementById('orderForm');
 if (orderForm) {
     orderForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        // Redirect to thank you page so Meta Pixel can track the lead/purchase properly
-        window.location.href = 'thankyou.html';
+        
+        const submitBtn = orderForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = 'جاري الإرسال... <i class="fas fa-spinner fa-spin"></i>';
+        submitBtn.disabled = true;
+
+        fetch("https://formsubmit.co/ajax/Alkawthergrope@gmail.com", {
+            method: "POST",
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                "العنوان": document.getElementById('address').value,
+                "رقم الهاتف": document.getElementById('phone').value,
+                "الكمية": document.getElementById('quantity').value,
+                "_subject": "طلب جديد: كرسي الأطفال (الكوثر للأثاث)"
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Redirect to thank you page so Meta Pixel can track the lead/purchase properly
+            window.location.href = 'thankyou.html';
+        })
+        .catch(error => {
+            console.error(error);
+            alert('حدث خطأ في الإرسال. يرجى المحاولة مرة أخرى.');
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
     });
 }
