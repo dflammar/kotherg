@@ -65,26 +65,35 @@ if (orderForm) {
             'الكمية': quantity
         });
 
-        // إرسال البيانات مع keepalive لضمان عدم إلغاء الطلب عند التحويل في الموبايل
+        // إرسال عبر سيرفر Vercel المباشر (حل جذري بدون أي قيود موبايل أو CORS)
+        const orderData = {
+            address: address,
+            phone: phone,
+            quantity: quantity,
+            'العنوان': address,
+            'رقم الهاتف': phone,
+            'الكمية': quantity
+        };
+
+        // 1. محاولة الإرسال عبر API الموقع (Vercel Serverless)
+        fetch('/api/order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        }).catch(err => console.log('API fallback to direct URL'));
+
+        // 2. إرسال مباشر أيضاً كنسخة احتياطية
         fetch(targetUrl, {
             method: "POST",
             mode: "no-cors",
-            headers: {
-                "Content-Type": "text/plain;charset=utf-8"
-            },
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: jsonBody,
             keepalive: true
-        })
-        .then(() => {
-            setTimeout(() => {
-                window.location.href = 'thankyou.html';
-            }, 500);
-        })
-        .catch(error => {
-            console.error(error);
-            setTimeout(() => {
-                window.location.href = 'thankyou.html';
-            }, 500);
-        });
+        }).catch(e => console.log(e));
+
+        // الانتظار ثانية واحدة للتأكد من خروج الطلب من شبكة الموبايل
+        setTimeout(() => {
+            window.location.href = 'thankyou.html';
+        }, 1200);
     });
 }
