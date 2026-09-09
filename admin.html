@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - الطلبات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #d4a373;
+            --primary-dark: #cc9056;
+            --secondary: #8a5a44;
+            --bg-light: #fdfbf7;
+            --text-dark: #2c2927;
+        }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f4f7f6;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: var(--secondary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 15px;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: 800;
+            color: var(--secondary);
+        }
+        tr:hover {
+            background-color: #fdfbf7;
+        }
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        /* Login Overlay */
+        #loginOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 15px;
+            margin: 20px 0;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        .login-box button {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+        }
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 50px;
+            font-size: 2rem;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Login Overlay -->
+    <div id="loginOverlay">
+        <div class="login-box">
+            <h2><i class="fas fa-lock"></i> تسجيل الدخول</h2>
+            <p>أدخل كلمة المرور لعرض الطلبات</p>
+            <input type="password" id="passwordInput" placeholder="كلمة المرور...">
+            <button onclick="checkPassword()">دخول</button>
+            <p id="loginError" style="color: red; display: none; margin-top: 10px;">كلمة المرور خاطئة!</p>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div class="header">
+        <h1><i class="fas fa-chart-line"></i> لوحة التحكم - طلبات العملاء</h1>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h3>أحدث الطلبات</h3>
+            
+            <div id="loader" class="loader">
+                <i class="fas fa-spinner fa-spin"></i> جاري جلب البيانات...
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table id="ordersTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>م</th>
+                            <th>التاريخ</th>
+                            <th>العنوان</th>
+                            <th>رقم الهاتف</th>
+                            <th>الكمية</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersBody">
+                        <!-- Orders will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+            <p id="noOrders" style="display: none; text-align: center; color: #777; margin-top: 20px;">لا توجد طلبات بعد.</p>
+        </div>
+    </div>
+
+    <script>
+        // --- ⚠️ إعدادات لوحة التحكم ---
+        const ADMIN_PASSWORD = "123456"; // كلمة المرور
+        // ✅ رابط جوجل شيت Web App
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwZKoOvZeYbImuRbPVZrmaouCTtXx7qIWS2kWhqWKsBDn1CS2AnYICJ6zJAN07sDW18/exec"; 
+
+        function checkPassword() {
+            const pass = document.getElementById('passwordInput').value;
+            if (pass === ADMIN_PASSWORD) {
+                document.getElementById('loginOverlay').style.display = 'none';
+                fetchOrders();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        // Add Enter key listener
+        document.getElementById('passwordInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+
+        function fetchOrders() {
+            if (GOOGLE_SHEET_URL === "ضع_رابط_جوجل_شيت_هنا") {
+                alert("يرجى وضع رابط الـ Google Sheet Web App في ملف admin.html (السطر 122)");
+                return;
+            }
+
+            document.getElementById('loader').style.display = 'block';
+
+            fetch(GOOGLE_SHEET_URL)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('loader').style.display = 'none';
+                    const tbody = document.getElementById('ordersBody');
+                    
+                    // إذا كان الشيت فارغ
+                    if (!data || data.length === 0) {
+                        document.getElementById('noOrders').style.display = 'block';
+                        return;
+                    }
+
+                    document.getElementById('ordersTable').style.display = 'table';
+                    
+                    // عكس المصفوفة لعرض الأحدث أولاً
+                    const orders = data.reverse();
+
+                    let count = 1;
+                    orders.forEach(row => {
+                        // تجاهل الصفوف الفارغة
+                        if(!row[0] && !row[1]) return;
+                        
+                        const tr = document.createElement('tr');
+                        
+                        // تنسيق التاريخ
+                        let dateStr = row[0] ? new Date(row[0]).toLocaleDateString('ar-EG') : 'غير متوفر';
+                        if(dateStr === 'Invalid Date') dateStr = row[0];
+
+                        tr.innerHTML = `
+                            <td>${count++}</td>
+                            <td>${dateStr}</td>
+                            <td>${row[1] || '-'}</td>
+                            <td dir="ltr" style="text-align: right;">${row[2] || '-'}</td>
+                            <td>${row[3] || '1'}</td>
+                            <td><span class="badge-success">طلب جديد</span></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(err => {
+                    document.getElementById('loader').style.display = 'none';
+                    alert("حدث خطأ أثناء جلب الطلبات. تأكد من أن رابط الـ Web App يعمل بشكل صحيح وأنه تم إعداده بـ GET.");
+                    console.error(err);
+                });
+        }
+    </script>
+</body>
+</html>

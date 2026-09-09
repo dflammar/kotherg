@@ -45,21 +45,20 @@ if (orderForm) {
         submitBtn.innerHTML = 'جاري الإرسال... <i class="fas fa-spinner fa-spin"></i>';
         submitBtn.disabled = true;
 
-        fetch("https://formsubmit.co/ajax/Alkawthergrope@gmail.com", {
+        // ✅ رابط جوجل شيت Web App
+        const googleSheetUrl = "https://script.google.com/macros/s/AKfycbwZKoOvZeYbImuRbPVZrmaouCTtXx7qIWS2kWhqWKsBDn1CS2AnYICJ6zJAN07sDW18/exec"; 
+
+        const formData = new FormData();
+        formData.append('العنوان', document.getElementById('address').value);
+        formData.append('رقم الهاتف', document.getElementById('phone').value);
+        formData.append('الكمية', document.getElementById('quantity').value);
+
+        // إرسال البيانات إلى شيت جوجل
+        fetch(googleSheetUrl, {
             method: "POST",
-            headers: { 
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                "العنوان": document.getElementById('address').value,
-                "رقم الهاتف": document.getElementById('phone').value,
-                "الكمية": document.getElementById('quantity').value,
-                "_subject": "طلب جديد: كرسي الأطفال (الكوثر للأثاث)"
-            })
+            body: formData
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(response => {
             // Redirect to thank you page so Meta Pixel can track the lead/purchase properly
             window.location.href = 'thankyou.html';
         })
