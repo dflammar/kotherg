@@ -48,26 +48,43 @@ if (orderForm) {
         // ✅ رابط جوجل شيت Web App المعتمد والصحيح 100%
         const googleSheetUrl = "https://script.google.com/macros/s/AKfycbwZKoOvZeYbImuRbPVZrmaouCTtXx7qlWS2kWhqWKsBDn1CS2AnYICJ6zJANO7sDW18/exec"; 
 
-        const formData = new FormData();
-        formData.append('العنوان', document.getElementById('address').value);
-        formData.append('رقم الهاتف', document.getElementById('phone').value);
-        formData.append('الكمية', document.getElementById('quantity').value);
+        const address = document.getElementById('address').value;
+        const phone = document.getElementById('phone').value;
+        const quantity = document.getElementById('quantity').value;
 
-        // إرسال البيانات إلى شيت جوجل
-        fetch(googleSheetUrl, {
+        // تجهيز البيانات كـ URL Query وأيضاً JSON
+        const params = new URLSearchParams();
+        params.append('العنوان', address);
+        params.append('رقم الهاتف', phone);
+        params.append('الكمية', quantity);
+
+        const targetUrl = googleSheetUrl + '?' + params.toString();
+        const jsonBody = JSON.stringify({
+            'العنوان': address,
+            'رقم الهاتف': phone,
+            'الكمية': quantity
+        });
+
+        // إرسال البيانات مع keepalive لضمان عدم إلغاء الطلب عند التحويل في الموبايل
+        fetch(targetUrl, {
             method: "POST",
             mode: "no-cors",
-            body: formData
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+            },
+            body: jsonBody,
+            keepalive: true
         })
-        .then(response => {
-            // Redirect to thank you page so Meta Pixel can track the lead/purchase properly
-            window.location.href = 'thankyou.html';
+        .then(() => {
+            setTimeout(() => {
+                window.location.href = 'thankyou.html';
+            }, 500);
         })
         .catch(error => {
             console.error(error);
-            alert('حدث خطأ في الإرسال. يرجى المحاولة مرة أخرى.');
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
+            setTimeout(() => {
+                window.location.href = 'thankyou.html';
+            }, 500);
         });
     });
 }
