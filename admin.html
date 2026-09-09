@@ -218,15 +218,14 @@
                         const c = row.c || [];
                         const dateVal = c[0] ? (c[0].f || c[0].v || '') : '';
                         const addressVal = c[1] ? (c[1].v || '') : '';
-                        const phoneVal = c[2] ? (c[2].v || '') : '';
-                        const qtyVal = c[3] ? (c[3].v || '1') : '1';
+                        const phoneVal = c[2] ? (c[2].f || c[2].v || '') : '';
+                        const qtyVal = c[3] ? (c[3].f || c[3].v || '1') : '1';
 
                         // تخطي الصفوف الفارغة
                         if (!addressVal && !phoneVal) return;
 
                         let dateStr = dateVal;
-                        if (dateVal.startsWith && dateVal.startsWith('Date(')) {
-                            // تحويل تاريخ جوجل Date(yyyy,m,d,h,m,s)
+                        if (typeof dateVal === 'string' && dateVal.startsWith('Date(')) {
                             const parts = dateVal.match(/\d+/g);
                             if (parts) {
                                 const d = new Date(parts[0], parts[1], parts[2]);
