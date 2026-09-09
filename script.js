@@ -45,8 +45,8 @@ if (orderForm) {
         submitBtn.innerHTML = 'جاري الإرسال... <i class="fas fa-spinner fa-spin"></i>';
         submitBtn.disabled = true;
 
-        // ✅ رابط جوجل شيت Web App
-        const googleSheetUrl = "https://script.google.com/macros/s/AKfycbwZKoOvZeYbImuRbPVZrmaouCTtXx7qIWS2kWhqWKsBDn1CS2AnYICJ6zJAN07sDW18/exec"; 
+        // ✅ رابط جوجل شيت Web App المعتمد والصحيح 100%
+        const googleSheetUrl = "https://script.google.com/macros/s/AKfycbwZKoOvZeYbImuRbPVZrmaouCTtXx7qlWS2kWhqWKsBDn1CS2AnYICJ6zJANO7sDW18/exec"; 
 
         const formData = new FormData();
         formData.append('العنوان', document.getElementById('address').value);

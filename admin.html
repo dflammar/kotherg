@@ -182,57 +182,79 @@
             }
         });
 
+        // ✅ رابط قراءة الشيت مباشرة بدون أي أخطاء أو CORS
+        const SHEET_GVIZ_URL = "https://docs.google.com/spreadsheets/d/1pC2fZdh095Z9KNRDtr4DdfxX4ikay3irFl5LolJkrjM/gviz/tq?tqx=out:json";
+
         function fetchOrders() {
-            if (GOOGLE_SHEET_URL === "ضع_رابط_جوجل_شيت_هنا") {
-                alert("يرجى وضع رابط الـ Google Sheet Web App في ملف admin.html (السطر 122)");
-                return;
-            }
-
             document.getElementById('loader').style.display = 'block';
+            document.getElementById('noOrders').style.display = 'none';
+            document.getElementById('ordersTable').style.display = 'none';
+            const tbody = document.getElementById('ordersBody');
+            tbody.innerHTML = '';
 
-            fetch(GOOGLE_SHEET_URL)
-                .then(res => res.json())
-                .then(data => {
+            fetch(SHEET_GVIZ_URL)
+                .then(res => res.text())
+                .then(text => {
                     document.getElementById('loader').style.display = 'none';
-                    const tbody = document.getElementById('ordersBody');
+                    // استخراج الـ JSON من رد جوجل
+                    const jsonStart = text.indexOf('{');
+                    const jsonEnd = text.lastIndexOf('}') + 1;
+                    const data = JSON.parse(text.substring(jsonStart, jsonEnd));
                     
-                    // إذا كان الشيت فارغ
-                    if (!data || data.length === 0) {
+                    const rows = data.table && data.table.rows ? data.table.rows : [];
+                    
+                    if (rows.length === 0) {
                         document.getElementById('noOrders').style.display = 'block';
                         return;
                     }
 
                     document.getElementById('ordersTable').style.display = 'table';
                     
-                    // عكس المصفوفة لعرض الأحدث أولاً
-                    const orders = data.reverse();
-
+                    // عكس الترتيب لعرض الأحدث أولاً
+                    const reversedRows = [...rows].reverse();
                     let count = 1;
-                    orders.forEach(row => {
-                        // تجاهل الصفوف الفارغة
-                        if(!row[0] && !row[1]) return;
-                        
-                        const tr = document.createElement('tr');
-                        
-                        // تنسيق التاريخ
-                        let dateStr = row[0] ? new Date(row[0]).toLocaleDateString('ar-EG') : 'غير متوفر';
-                        if(dateStr === 'Invalid Date') dateStr = row[0];
 
+                    reversedRows.forEach(row => {
+                        const c = row.c || [];
+                        const dateVal = c[0] ? (c[0].f || c[0].v || '') : '';
+                        const addressVal = c[1] ? (c[1].v || '') : '';
+                        const phoneVal = c[2] ? (c[2].v || '') : '';
+                        const qtyVal = c[3] ? (c[3].v || '1') : '1';
+
+                        // تخطي الصفوف الفارغة
+                        if (!addressVal && !phoneVal) return;
+
+                        let dateStr = dateVal;
+                        if (dateVal.startsWith && dateVal.startsWith('Date(')) {
+                            // تحويل تاريخ جوجل Date(yyyy,m,d,h,m,s)
+                            const parts = dateVal.match(/\d+/g);
+                            if (parts) {
+                                const d = new Date(parts[0], parts[1], parts[2]);
+                                dateStr = d.toLocaleDateString('ar-EG');
+                            }
+                        }
+
+                        const tr = document.createElement('tr');
                         tr.innerHTML = `
                             <td>${count++}</td>
-                            <td>${dateStr}</td>
-                            <td>${row[1] || '-'}</td>
-                            <td dir="ltr" style="text-align: right;">${row[2] || '-'}</td>
-                            <td>${row[3] || '1'}</td>
+                            <td>${dateStr || 'غير متوفر'}</td>
+                            <td>${addressVal || '-'}</td>
+                            <td dir="ltr" style="text-align: right;">${phoneVal || '-'}</td>
+                            <td>${qtyVal}</td>
                             <td><span class="badge-success">طلب جديد</span></td>
                         `;
                         tbody.appendChild(tr);
                     });
+
+                    if (tbody.children.length === 0) {
+                        document.getElementById('ordersTable').style.display = 'none';
+                        document.getElementById('noOrders').style.display = 'block';
+                    }
                 })
                 .catch(err => {
                     document.getElementById('loader').style.display = 'none';
-                    alert("حدث خطأ أثناء جلب الطلبات. تأكد من أن رابط الـ Web App يعمل بشكل صحيح وأنه تم إعداده بـ GET.");
-                    console.error(err);
+                    console.error('Error loading sheet:', err);
+                    alert('حدث خطأ أثناء جلب الطلبات من الشيت. تأكد من اتصال الإنترنت.');
                 });
         }
     </script>
